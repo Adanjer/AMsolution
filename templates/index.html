@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vehicle Prediction System</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Vehicle Prediction System</h1>
+    <p>Predict maintenance costs, popularity, recommend vehicle types, classify market segments, and engine performance using AI-driven models.</p>
+  </header>
+  <main>
+    <!-- Maintenance Cost Prediction -->
+    <section class="container">
+      <h2>Maintenance Cost Prediction</h2>
+      <form id="predictionForm">
+        <label for="make">Make:</label>
+        <select id="make" name="make" required>
+          <option value="" disabled selected>Select Make</option>
+          {% for make in makes %}
+          <option value="{{ make }}">{{ make }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="model">Model:</label>
+        <select id="model" name="model" required>
+          <option value="" disabled selected>Select Model</option>
+          {% for model in models %}
+          <option value="{{ model }}">{{ model }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="vehicle_size">Vehicle Size:</label>
+        <select id="vehicle_size" name="vehicle_size" required>
+          <option value="" disabled selected>Select Vehicle Size</option>
+          {% for size in vehicle_sizes %}
+          <option value="{{ size }}">{{ size }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="market_category">Market Category:</label>
+        <select id="market_category" name="market_category" required>
+         <option value="" disabled selected>Select Market Category</option>
+         {% for category in market_categories %}
+         <option value="{{ category }}">{{ category }}</option>
+        {% endfor %}
+        </select>
+
+        <label for="vehicle_style">Vehicle Style:</label>
+        <select id="vehicle_style" name="vehicle_style" required>
+          <option value="" disabled selected>Select Vehicle Style</option>
+          {% for style in vehicle_styles %}
+          <option value="{{ style }}">{{ style }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="avg_mpg">Average MPG:</label>
+        <input type="number" id="avg_mpg" name="avg_mpg" placeholder="e.g., 25" required>
+
+        <label for="year">Year:</label>
+        <input type="number" id="year" name="year" placeholder="e.g., 2015" required>
+
+        <label for="engine_hp">Engine HP:</label>
+        <input type="number" id="engine_hp" name="engine_hp" placeholder="e.g., 200" required>
+
+        <button type="button" onclick="getPredictions()">Predict</button>
+      </form>
+      <div id="predictions">
+        <h3>Prediction Results</h3>
+        <p id="resultMessage"></p>
+      </div>
+    </section>
+
+    <!-- Vehicle Popularity Prediction -->
+    <section class="container">
+      <h2>Vehicle Popularity Prediction</h2>
+      <form id="popularityForm">
+        <label for="make">Make:</label>
+        <select id="make" name="make" required>
+          <option value="" disabled selected>Select Make</option>
+          {% for make in makes %}
+          <option value="{{ make }}">{{ make }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="model">Model:</label>
+        <select id="model" name="model" required>
+          <option value="" disabled selected>Select Model</option>
+          {% for model in models %}
+          <option value="{{ model }}">{{ model }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="market_category">Market Category:</label>
+        <select id="market_category" name="market_category" required>
+          <option value="" disabled selected>Select Market Category</option>
+          {% for category in market_categories %}
+          <option value="{{ category }}">{{ category }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="vehicle_style">Vehicle Style:</label>
+        <select id="vehicle_style" name="vehicle_style" required>
+          <option value="" disabled selected>Select Vehicle Style</option>
+          {% for style in vehicle_styles %}
+          <option value="{{ style }}">{{ style }}</option>
+          {% endfor %}
+        </select>
+
+        <button type="button" onclick="predictPopularity()">Predict Popularity</button>
+      </form>
+      <div id="popularityResults">
+        <h3>Popularity Prediction Result Total Score</h3>
+        <p id="popularityResultMessage"></p>
+      </div>
+    </section>
+
+    <!-- Vehicle Type Recommendation -->
+    <section class="container">
+      <h2>Vehicle Type Recommendation</h2>
+      <form id="vehicleTypeForm">
+        <label for="make">Make:</label>
+        <select id="make" name="make" required>
+          <option value="" disabled selected>Select Make</option>
+          {% for make in makes %}
+          <option value="{{ make }}">{{ make }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="model">Model:</label>
+        <select id="model" name="model" required>
+          <option value="" disabled selected>Select Model</option>
+          {% for model in models %}
+          <option value="{{ model }}">{{ model }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="market_category">Market Category:</label>
+        <select id="market_category" name="market_category" required>
+          <option value="" disabled selected>Select Market Category</option>
+          {% for category in market_categories %}
+          <option value="{{ category }}">{{ category }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="vehicle_size">Vehicle Size:</label>
+        <select id="vehicle_size" name="vehicle_size" required>
+          <option value="" disabled selected>Select Vehicle Size</option>
+          {% for size in vehicle_sizes %}
+          <option value="{{ size }}">{{ size }}</option>
+          {% endfor %}
+        </select>
+
+        <button type="button" onclick="recommendVehicleType()">Get Recommendation</button>
+      </form>
+      <div id="vehicleTypeResults">
+        <h3>Vehicle Type Recommendation Result</h3>
+        <p id="vehicleTypeResultMessage"></p>
+      </div>
+    </section>
+
+    <!-- Market Segment Classification -->
+    <section class="container">
+      <h2>Market Segment Classification</h2>
+      <form id="marketSegmentForm">
+        <label for="make">Make:</label>
+        <select id="make" name="make" required>
+          <option value="" disabled selected>Select Make</option>
+          {% for make in makes %}
+          <option value="{{ make }}">{{ make }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="model">Model:</label>
+        <select id="model" name="model" required>
+          <option value="" disabled selected>Select Model</option>
+          {% for model in models %}
+          <option value="{{ model }}">{{ model }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="vehicle_style">Vehicle Style:</label>
+        <select id="vehicle_style" name="vehicle_style" required>
+          <option value="" disabled selected>Select Vehicle Style</option>
+          {% for style in vehicle_styles %}
+          <option value="{{ style }}">{{ style }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="vehicle_size">Vehicle Size:</label>
+        <select id="vehicle_size" name="vehicle_size" required>
+          <option value="" disabled selected>Select Vehicle Size</option>
+          {% for size in vehicle_sizes %}
+          <option value="{{ size }}">{{ size }}</option>
+          {% endfor %}
+        </select>
+
+        <button type="button" onclick="classifyMarketSegment()">Classify Segment</button>
+      </form>
+      <div id="marketSegmentResults">
+        <h3>Market Segment Classification Result</h3>
+        <p id="marketSegmentResultMessage"></p>
+      </div>
+    </section>
+
+    <!-- Engine Performance Classification -->
+    <section class="container">
+      <h2>Engine Performance Classification</h2>
+      <form id="enginePerformanceForm">
+        <label for="engine_cylinders">Engine Cylinders:</label>
+        <input type="number" id="engine_cylinders" name="engine_cylinders" placeholder="e.g., 4" required>
+
+        <label for="vehicle_size">Vehicle Size:</label>
+        <select id="vehicle_size" name="vehicle_size" required>
+          <option value="" disabled selected>Select Vehicle Size</option>
+          {% for size in vehicle_sizes %}
+          <option value="{{ size }}">{{ size }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="vehicle_style">Vehicle Style:</label>
+        <select id="vehicle_style" name="vehicle_style" required>
+          <option value="" disabled selected>Select Vehicle Style</option>
+          {% for style in vehicle_styles %}
+          <option value="{{ style }}">{{ style }}</option>
+          {% endfor %}
+        </select>
+
+        <button type="button" onclick="classifyEnginePerformance()">Classify Performance</button>
+      </form>
+      <div id="enginePerformanceResults">
+        <h3>Engine Performance Horsepower Classification Result</h3>
+        <p id="enginePerformanceResultMessage"></p>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <p>&copy; 2024 Vehicle Prediction System. All rights reserved.</p>
+  </footer>
+
+  <script>
+    async function getPredictions() {
+  const formData = new FormData(document.getElementById('predictionForm'));
+  const inputData = Object.fromEntries(formData.entries());
+
+  try {
+    const response = await fetch('/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(inputData),
+    });
+    const data = await response.json();
+    console.log(data); // Log the response for debugging
+
+    const resultMessage = document.getElementById('resultMessage');
+    if (data.error) {
+      resultMessage.innerText = `Error: ${data.error}`;
+    } else {
+      // Ensure the property exists and is valid before using `.toFixed()`
+      if (data.predicted_maintenance_cost !== undefined) {
+        resultMessage.innerText = `Predicted Maintenance Cost: $${data.predicted_maintenance_cost.toFixed(2)}`;
+      } else {
+        resultMessage.innerText = `Error: Predicted cost is undefined.`;
+      }
+    }
+  } catch (error) {
+    document.getElementById('resultMessage').innerText = `Error: ${error.message}`;
+  }
+}
+async function getPredictions() {
+    const formData = new FormData(document.getElementById('predictionForm'));
+    const inputData = Object.fromEntries(formData.entries());
+
+    try {
+        const response = await fetch('/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(inputData),
+        });
+        const data = await response.json();
+
+        const resultMessage = document.getElementById('resultMessage');
+        if (data.error) {
+            resultMessage.innerText = `Error: ${data.error}`;
+        } else {
+            let results = 'Prediction Results:\n';
+            for (const [model, value] of Object.entries(data)) {
+                results += `${model}: $${value.toFixed(2)}\n`;
+            }
+            resultMessage.innerText = results;
+        }
+    } catch (error) {
+        document.getElementById('resultMessage').innerText = `Error: ${error.message}`;
+    }
+}
+
+
+
+    async function predictPopularity() {
+      const formData = new FormData(document.getElementById('popularityForm'));
+      const inputData = Object.fromEntries(formData.entries());
+
+      try {
+        const response = await fetch('/predict_popularity', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(inputData),
+        });
+        const data = await response.json();
+
+        const resultMessage = document.getElementById('popularityResultMessage');
+        if (data.error) {
+          resultMessage.innerText = `Error: ${data.error}`;
+        } else {
+          resultMessage.innerText = `Predicted Popularity: ${data.predicted_popularity}`;
+        }
+      } catch (error) {
+        document.getElementById('popularityResultMessage').innerText = `Error: ${error.message}`;
+      }
+    }
+
+    async function recommendVehicleType() {
+      const formData = new FormData(document.getElementById('vehicleTypeForm'));
+      const inputData = Object.fromEntries(formData.entries());
+
+      try {
+        const response = await fetch('/recommend_vehicle_type', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(inputData),
+        });
+        const data = await response.json();
+
+        const resultMessage = document.getElementById('vehicleTypeResultMessage');
+        if (data.error) {
+          resultMessage.innerText = `Error: ${data.error}`;
+        } else {
+          resultMessage.innerText = `Recommended Vehicle Type: ${data.recommended_vehicle_type}`;
+        }
+      } catch (error) {
+        document.getElementById('vehicleTypeResultMessage').innerText = `Error: ${error.message}`;
+      }
+    }
+
+    async function classifyMarketSegment() {
+      const formData = new FormData(document.getElementById('marketSegmentForm'));
+      const inputData = Object.fromEntries(formData.entries());
+
+      try {
+        const response = await fetch('/classify_market_segment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(inputData),
+        });
+        const data = await response.json();
+
+        const resultMessage = document.getElementById('marketSegmentResultMessage');
+        if (data.error) {
+          resultMessage.innerText = `Error: ${data.error}`;
+        } else {
+          resultMessage.innerText = `Predicted Market Category: ${data.predicted_market_category}`;
+        }
+      } catch (error) {
+        document.getElementById('marketSegmentResultMessage').innerText = `Error: ${error.message}`;
+      }
+    }
+
+    async function classifyEnginePerformance() {
+      const formData = new FormData(document.getElementById('enginePerformanceForm'));
+      const inputData = Object.fromEntries(formData.entries());
+
+      try {
+        const response = await fetch('/classify_engine_performance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(inputData),
+        });
+        const data = await response.json();
+
+        const resultMessage = document.getElementById('enginePerformanceResultMessage');
+        if (data.error) {
+          resultMessage.innerText = `Error: ${data.error}`;
+        } else {
+          resultMessage.innerText = `Predicted Engine Performance: ${data.predicted_engine_performance}`;
+        }
+      } catch (error) {
+        document.getElementById('enginePerformanceResultMessage').innerText = `Error: ${error.message}`;
+      }
+    }
+  </script>
+</body>
+</html>
+
+         
+       
