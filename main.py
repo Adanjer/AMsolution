@@ -21,17 +21,17 @@ market_categories = sorted(data['Market Category'].dropna().unique())
 MODELS_PATH = 'models/'
 
 # Load models and preprocessor
-models_dict = {
-    "Linear Regression": joblib.load(f'{MODELS_PATH}/linear_regression_model.pkl'),
-    "Naive Bayes": joblib.load(f'{MODELS_PATH}/naive_bayes_model (1).pkl'),
-    "K-Nearest Neighbors": joblib.load(f'{MODELS_PATH}/knn_model (1).pkl'),
-    "Support Vector Machine": joblib.load(f'{MODELS_PATH}/svm_model.pkl'),
-    "Decision Tree": joblib.load(f'{MODELS_PATH}/decision_tree_model.pkl'),
-    "Artificial Neural Network": joblib.load(f'{MODELS_PATH}/ann_model.pkl'),
-}
+lr_model = joblib.load(f'{MODELS_PATH}/linear_regression_model.pkl')
 preprocessor = joblib.load(f'{MODELS_PATH}/preprocessor.pkl')
+lr_model = joblib.load(f'{MODELS_PATH}/linear_regression_model.pkl')
+ann_model = joblib.load(f'{MODELS_PATH}/ann_model.pkl')
+scaler = joblib.load(f'{MODELS_PATH}/scaler.pkl')
 
-
+# Model mapping
+models_dict = {
+    "Linear Regression": lr_model,
+    "Artificial Neural Network": ann_model
+}
 @app.route('/')
 def index():
     """Render the homepage with dropdown options."""
@@ -44,31 +44,24 @@ def index():
         market_categories=market_categories
     )
 
-
 @app.route('/predict', methods=['POST'])
 def predict():
     """Handle predictions for maintenance cost."""
     try:
+        # Get input data from the request
         data = request.json
-        print(data)  # Debugging: Log received data
-
-        # Extract fields with default values for safety
-        make = data.get('make')
-        model = data.get('model')
-        vehicle_size = data.get('vehicle_size')
-        market_category = data.get('market_category')
-        vehicle_style = data.get('vehicle_style')
-        avg_mpg = float(data.get('avg_mpg', 0))
-        year = int(data.get('year', 0))
-        engine_hp = float(data.get('engine_hp', 0))
+        make = data['make']
+        model = data['model']
+        vehicle_size = data['vehicle_size']
+        market_category = data['market_category']
+        vehicle_style = data['vehicle_style']
+        avg_mpg = float(data['avg_mpg'])
+        year = int(data['year'])
+        engine_hp = float(data['engine_hp'])
         current_year = 2024
-        vehicle_age = max(0, current_year - year)  # Ensure age is non-negative
+        vehicle_age = current_year - year
 
-        # Check for missing required fields
-        if not all([make, model, vehicle_size, market_category, vehicle_style]):
-            return jsonify({"error": "Missing required fields"}), 400
-
-        # Prepare input
+        # Prepare input as a DataFrame with correct column names
         input_features = pd.DataFrame([{
             'Make': make,
             'Model': model,
@@ -80,34 +73,28 @@ def predict():
             'Engine HP': engine_hp
         }])
 
-        # Transform and convert to dense
+        # Transform input features
         input_data = preprocessor.transform(input_features)
-        if hasattr(input_data, "toarray"):
-            input_data = input_data.toarray()
 
-        # Predictions from models
-        predictions = {}
-        for model_name, model in models_dict.items():
-            predictions[model_name] = max(0, float(model.predict(input_data)[0]))
+        # Predict maintenance cost using the linear regression model
+        predicted_cost = max(0, float(lr_model.predict(input_data)[0]))
 
-        return jsonify(predictions)
+        return jsonify({"predicted_maintenance_cost": predicted_cost})
 
     except Exception as e:
         return jsonify({"error": str(e)})
-
-
-
-
 @app.route('/predict_popularity', methods=['POST'])
 def predict_popularity():
     """Handle predictions for vehicle popularity."""
     try:
+        # Get input data from the request
         data = request.json
         make = data['make']
         model = data['model']
         market_category = data['market_category']
         vehicle_style = data['vehicle_style']
 
+        # Prepare input as a DataFrame
         input_features = pd.DataFrame([{
             'Make': make,
             'Model': model,
@@ -115,25 +102,28 @@ def predict_popularity():
             'Vehicle Style': vehicle_style
         }])
 
-        popularity_model = joblib.load(f'{MODELS_PATH}/popularity_model.pkl')
+        # Load popularity model
+        popularity_model = joblib.load(f'{MODELS_PATH}/knn.pkl')
+
+        # Predict popularity
         predicted_popularity = popularity_model.predict(input_features)[0]
 
         return jsonify({"predicted_popularity": int(predicted_popularity)})
 
     except Exception as e:
         return jsonify({"error": str(e)})
-
-
 @app.route('/recommend_vehicle_type', methods=['POST'])
 def recommend_vehicle_type():
     """Handle recommendations for vehicle type."""
     try:
+        # Get input data from the request
         data = request.json
         make = data['make']
         model = data['model']
         market_category = data['market_category']
         vehicle_size = data['vehicle_size']
 
+        # Prepare input as a DataFrame
         input_features = pd.DataFrame([{
             'Make': make,
             'Model': model,
@@ -141,25 +131,28 @@ def recommend_vehicle_type():
             'Vehicle Size': vehicle_size
         }])
 
-        vehicle_type_model = joblib.load(f'{MODELS_PATH}/vehicle_type_model.pkl')
+        # Load the vehicle type model
+        vehicle_type_model = joblib.load(f'{MODELS_PATH}/decision_tree_model.pkl')
+
+        # Predict vehicle type
         recommended_type = vehicle_type_model.predict(input_features)[0]
 
         return jsonify({"recommended_vehicle_type": recommended_type})
 
     except Exception as e:
         return jsonify({"error": str(e)})
-
-
 @app.route('/classify_market_segment', methods=['POST'])
 def classify_market_segment():
     """Handle market segment classification."""
     try:
+        # Get input data from the request
         data = request.json
         make = data['make']
         model = data['model']
         vehicle_style = data['vehicle_style']
         vehicle_size = data['vehicle_size']
 
+        # Prepare input as a DataFrame
         input_features = pd.DataFrame([{
             'Make': make,
             'Model': model,
@@ -167,7 +160,10 @@ def classify_market_segment():
             'Vehicle Size': vehicle_size
         }])
 
-        market_category_model = joblib.load(f'{MODELS_PATH}/market_category_model.pkl')
+        # Load the market category model
+        market_category_model = joblib.load(f'{MODELS_PATH}/naive_bayes_model.pkl')
+
+        # Predict market category
         predicted_category = market_category_model.predict(input_features)[0]
 
         return jsonify({"predicted_market_category": predicted_category})
@@ -175,26 +171,32 @@ def classify_market_segment():
     except Exception as e:
         return jsonify({"error": str(e)})
 
-
 @app.route('/classify_engine_performance', methods=['POST'])
 def classify_engine_performance():
     """Classify engine performance based on user input."""
     try:
+        # Get input data from the request
         data = request.json
         engine_cylinders = float(data['engine_cylinders'])
         vehicle_size = data['vehicle_size']
         vehicle_style = data['vehicle_style']
 
+        # Load encoders
         size_encoder = joblib.load(f'{MODELS_PATH}/Vehicle Size_encoder.pkl')
         style_encoder = joblib.load(f'{MODELS_PATH}/Vehicle Style_encoder.pkl')
         hp_encoder = joblib.load(f'{MODELS_PATH}/hp_category_encoder.pkl')
 
+        # Encode inputs
         encoded_size = size_encoder.transform([vehicle_size])
         encoded_style = style_encoder.transform([vehicle_style])
 
+        # Prepare input for the model
         input_data = [[engine_cylinders, encoded_size[0], encoded_style[0]]]
 
-        model = joblib.load(f'{MODELS_PATH}/engine_performance_model.pkl')
+        # Load the model
+        model = joblib.load(f'{MODELS_PATH}/svm_model.pkl')
+
+        # Predict category
         prediction = model.predict(input_data)[0]
         predicted_category = hp_encoder.inverse_transform([prediction])[0]
 
@@ -204,5 +206,7 @@ def classify_engine_performance():
         return jsonify({"error": str(e)})
 
 
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True)  
+
